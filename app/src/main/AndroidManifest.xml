@@ -56,5 +56,8 @@
             android:name=".MeshService"
             android:exported="false"
             android:foregroundServiceType="microphone|location"/>
+        <receiver android:name=".UpdateDoneReceiver" android:exported="false">
+            <intent-filter><action android:name="android.intent.action.MY_PACKAGE_REPLACED"/></intent-filter>
+        </receiver>
     </application>
 </manifest>

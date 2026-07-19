@@ -46,6 +46,7 @@ import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
     private var mmFocusReq: AudioFocusRequest? = null
+    private var mmVolSnap = -1
 
     private lateinit var web: WebView
     private var fileCb: ValueCallback<Array<Uri>>? = null
@@ -109,6 +110,7 @@ class MainActivity : AppCompatActivity() {
                     try {
                         val am = getSystemService(AUDIO_SERVICE) as AudioManager
                         if (mode == "duck") {
+                            if (mmVolSnap < 0) try { mmVolSnap = am.getStreamVolume(AudioManager.STREAM_MUSIC) } catch (_: Exception) { mmVolSnap = -1 }
                             if (mmFocusReq == null) {
                                 val attrs = AudioAttributes.Builder()
                                     .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
@@ -122,6 +124,7 @@ class MainActivity : AppCompatActivity() {
                             res = am.requestAudioFocus(mmFocusReq!!)
                         } else {
                             res = mmFocusReq?.let { val r = am.abandonAudioFocusRequest(it); mmFocusReq = null; r } ?: 1
+                            Handler(Looper.getMainLooper()).postDelayed({ try { if (mmVolSnap >= 0) { val amx = getSystemService(AUDIO_SERVICE) as AudioManager; val cv = amx.getStreamVolume(AudioManager.STREAM_MUSIC); if (cv < mmVolSnap) amx.setStreamVolume(AudioManager.STREAM_MUSIC, mmVolSnap, 0) } } catch (_: Exception) {}; mmVolSnap = -1 }, 600)
                         }
                     } catch (_: Exception) {}
                     try { web.evaluateJavascript("try{window.mmFocusResult&&mmFocusResult(\"" + mode + "\"," + res + ")}catch(e){}", null) } catch (_: Exception) {}
@@ -153,7 +156,7 @@ class MainActivity : AppCompatActivity() {
             mediaPlaybackRequiresUserGesture = false
             setGeolocationEnabled(true)
             // Mark the shell so the PWA can detect it and enable shell-only UX later.
-            userAgentString = userAgentString + " MotoMeshShell/1.13"
+            userAgentString = userAgentString + " MotoMeshShell/1.14"
         }
 
         web.webViewClient = object : WebViewClient() {
@@ -288,6 +291,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         stopNfc()
         try { mmFocusReq?.let { (getSystemService(AUDIO_SERVICE) as AudioManager).abandonAudioFocusRequest(it) } } catch (_: Exception) {}
+        try { if (mmVolSnap >= 0) { val amx = getSystemService(AUDIO_SERVICE) as AudioManager; if (amx.getStreamVolume(AudioManager.STREAM_MUSIC) < mmVolSnap) amx.setStreamVolume(AudioManager.STREAM_MUSIC, mmVolSnap, 0); mmVolSnap = -1 } } catch (_: Exception) {}
         if (isFinishing) stopService(Intent(this, MeshService::class.java))
         super.onDestroy()
     }
