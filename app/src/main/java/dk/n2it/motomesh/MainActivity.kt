@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.1 · 2026-07-19
+// Moto Mesh Shell v1.3 · 2026-07-19
 // Thin native host: System WebView loads the unchanged PWA at https://app.moto-mesh.com.
 // Because THIS app process holds RECORD_AUDIO + a microphone|location foreground service,
 // getUserMedia and geolocation inside the WebView keep running when the app is backgrounded
@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity() {
             mediaPlaybackRequiresUserGesture = false
             setGeolocationEnabled(true)
             // Mark the shell so the PWA can detect it and enable shell-only UX later.
-            userAgentString = userAgentString + " MotoMeshShell/1.1"
+            userAgentString = userAgentString + " MotoMeshShell/1.3"
         }
 
         web.webViewClient = object : WebViewClient() {
@@ -139,6 +139,7 @@ class MainActivity : AppCompatActivity() {
 
         requestNeededPermissions()
         web.loadUrl(APP_URL)
+        web.postDelayed({ try { Updater.check(this) } catch (_: Exception) {} }, 8000)
     }
 
     private fun requestNeededPermissions() {

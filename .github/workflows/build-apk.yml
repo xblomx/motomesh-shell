@@ -1,4 +1,4 @@
-# Moto Mesh Shell · CI v3.1 · permanent-key release signing + rolling public release
+# Moto Mesh Shell · CI v4 · auto-versioned, permanently signed, dual-release (latest + tagged history)
 name: build-apk
 on: { push: { branches: [ main ] }, workflow_dispatch: {} }
 permissions: { contents: write }
@@ -8,8 +8,10 @@ jobs:
     env:
       KS_PATH: /home/runner/motomesh-release.jks
       KS_PW: ${{ secrets.KEYSTORE_PW }}
+      VC: ${{ github.run_number }}
     steps:
       - uses: actions/checkout@v4
+      - run: echo "VN=$(cat VERSION)" >> $GITHUB_ENV
       - run: echo "${{ secrets.KEYSTORE_B64 }}" | base64 -d > $KS_PATH
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: '17' }
@@ -25,4 +27,10 @@ jobs:
           tag_name: shell-latest
           name: Moto Mesh Shell (latest)
           make_latest: true
+          files: motomesh-shell.apk
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: shell-v${{ env.VN }}-b${{ github.run_number }}
+          name: Moto Mesh Shell v${{ env.VN }} (build ${{ github.run_number }})
+          make_latest: false
           files: motomesh-shell.apk

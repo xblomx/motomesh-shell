@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.1 · 2026-07-19 · dk.n2it.motomesh
+// Moto Mesh Shell v1.3 · 2026-07-19 · dk.n2it.motomesh
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
@@ -10,27 +10,15 @@ android {
         applicationId "dk.n2it.motomesh"
         minSdk 26
         targetSdk 34
-        versionCode 3
-        versionName "1.1"
+        versionCode ((System.getenv("VC") ?: "999") as Integer)
+        versionName (System.getenv("VN") ?: "1.3-dev")
     }
     signingConfigs {
         release {
             storeFile file(System.getenv("KS_PATH") ?: "missing.jks")
-            storePassword System.getenv("KS_PW"); keyAlias "motomesh"; keyPassword System.getenv("KS_PW")
-        }
-    }
-    lint { checkReleaseBuilds false; abortOnError false }
-    signingConfigs {
-        release {
-            storeFile file(System.getenv("KS_PATH") ?: "missing.jks")
-            storePassword System.getenv("KS_PW"); keyAlias "motomesh"; keyPassword System.getenv("KS_PW")
-        }
-    }
-    lint { checkReleaseBuilds false; abortOnError false }
-    signingConfigs {
-        release {
-            storeFile file(System.getenv("KS_PATH") ?: "missing.jks")
-            storePassword System.getenv("KS_PW"); keyAlias "motomesh"; keyPassword System.getenv("KS_PW")
+            storePassword System.getenv("KS_PW")
+            keyAlias "motomesh"
+            keyPassword System.getenv("KS_PW")
         }
     }
     lint { checkReleaseBuilds false; abortOnError false }
