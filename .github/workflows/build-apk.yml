@@ -1,11 +1,13 @@
-# Moto Mesh Shell · CI v3 · permanent-key release signing + rolling public release
+# Moto Mesh Shell · CI v3.1 · permanent-key release signing + rolling public release
 name: build-apk
 on: { push: { branches: [ main ] }, workflow_dispatch: {} }
 permissions: { contents: write }
 jobs:
   apk:
     runs-on: ubuntu-latest
-    env: { KS_PATH: /home/runner/motomesh-release.jks, KS_PW: ${{ secrets.KEYSTORE_PW }} }
+    env:
+      KS_PATH: /home/runner/motomesh-release.jks
+      KS_PW: ${{ secrets.KEYSTORE_PW }}
     steps:
       - uses: actions/checkout@v4
       - run: echo "${{ secrets.KEYSTORE_B64 }}" | base64 -d > $KS_PATH
@@ -19,4 +21,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         with: { name: MotoMeshShell-apk, path: motomesh-shell.apk }
       - uses: softprops/action-gh-release@v2
-        with: { tag_name: shell-latest, name: Moto Mesh Shell (latest), make_latest: true, files: motomesh-shell.apk }
+        with:
+          tag_name: shell-latest
+          name: Moto Mesh Shell (latest)
+          make_latest: true
+          files: motomesh-shell.apk
