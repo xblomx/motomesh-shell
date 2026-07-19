@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.4 · 2026-07-19
+// Moto Mesh Shell v1.5 · 2026-07-19
 // Thin native host: System WebView loads the unchanged PWA at https://app.moto-mesh.com.
 // Because THIS app process holds RECORD_AUDIO + a microphone|location foreground service,
 // getUserMedia and geolocation inside the WebView keep running when the app is backgrounded
@@ -80,6 +80,13 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             @JavascriptInterface
+            fun shareText(t: String) {
+                try {
+                    val i = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, t)
+                    startActivity(Intent.createChooser(i, "Share"))
+                } catch (_: Exception) {}
+            }
+            @JavascriptInterface
             fun setUpdateToken(t: String) {
                 try { getSharedPreferences("mm", MODE_PRIVATE).edit().putString("dlc", t.trim()).apply() } catch (_: Exception) {}
             }
@@ -103,7 +110,7 @@ class MainActivity : AppCompatActivity() {
             mediaPlaybackRequiresUserGesture = false
             setGeolocationEnabled(true)
             // Mark the shell so the PWA can detect it and enable shell-only UX later.
-            userAgentString = userAgentString + " MotoMeshShell/1.4"
+            userAgentString = userAgentString + " MotoMeshShell/1.5"
         }
 
         web.webViewClient = object : WebViewClient() {
@@ -122,7 +129,8 @@ class MainActivity : AppCompatActivity() {
                 // The user already granted mic to the APP; forward that grant to the page.
                 runOnUiThread {
                     val wants = request.resources.filter {
-                        it == PermissionRequest.RESOURCE_AUDIO_CAPTURE
+                        it == PermissionRequest.RESOURCE_AUDIO_CAPTURE ||
+                        it == PermissionRequest.RESOURCE_VIDEO_CAPTURE
                     }.toTypedArray()
                     if (wants.isNotEmpty()) request.grant(wants) else request.deny()
                 }
@@ -150,6 +158,7 @@ class MainActivity : AppCompatActivity() {
         val need = mutableListOf<String>()
         for (p in arrayOf(
             Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.CAMERA,
             Manifest.permission.ACCESS_FINE_LOCATION
         )) if (ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED) need += p
         if (Build.VERSION.SDK_INT >= 33 &&

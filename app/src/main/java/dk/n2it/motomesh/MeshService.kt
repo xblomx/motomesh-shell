@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.4 · 2026-07-19
+// Moto Mesh Shell v1.5 · 2026-07-19
 // The legal keeper of background mic + location. While this notification lives,
 // Android lets the WebView's WebRTC capture and geolocation continue behind any app.
 // It also puts the device in COMMUNICATION mode with voice-call audio focus,
@@ -74,7 +74,7 @@ class MeshService : Service() {
     private fun enterCommMode() {
         try {
             val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            am.mode = AudioManager.MODE_IN_COMMUNICATION
+            // v1.5: MODE_IN_COMMUNICATION removed · could hijack mic routing on some devices; voice-focus kept
             if (Build.VERSION.SDK_INT >= 26) {
                 focus = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
                     .setAudioAttributes(
@@ -101,7 +101,6 @@ class MeshService : Service() {
     override fun onDestroy() {
         try {
             val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            am.mode = AudioManager.MODE_NORMAL
             if (Build.VERSION.SDK_INT >= 26) focus?.let { am.abandonAudioFocusRequest(it) }
         } catch (_: Exception) {}
         try { wake?.release() } catch (_: Exception) {}
