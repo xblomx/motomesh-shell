@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.7 · 2026-07-19
+// Moto Mesh Shell v1.8 · 2026-07-19
 // Thin native host: System WebView loads the unchanged PWA at https://app.moto-mesh.com.
 // Because THIS app process holds RECORD_AUDIO + a microphone|location foreground service,
 // getUserMedia and geolocation inside the WebView keep running when the app is backgrounded
@@ -15,6 +15,14 @@ import android.view.KeyEvent
 import android.app.DownloadManager
 import android.content.ContentValues
 import android.net.Uri
+import android.nfc.NdefMessage
+import android.nfc.NdefRecord
+import android.nfc.NfcAdapter
+import android.nfc.Tag
+import android.nfc.tech.Ndef
+import android.nfc.tech.NdefFormatable
+import android.os.Handler
+import android.os.Looper
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Base64
@@ -38,6 +46,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var web: WebView
     private var fileCb: ValueCallback<Array<Uri>>? = null
     private lateinit var fileLauncher: ActivityResultLauncher<Intent>
+    private var nfcUrl: String? = null
+    private var nfcTimeout: Runnable? = null
     private val APP_URL = "https://app.moto-mesh.com"
     private val PERM_REQ = 4711
 
@@ -80,6 +90,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             @JavascriptInterface
+            fun writeNfc(u: String) { runOnUiThread { startNfcWrite(u) } }
+            @JavascriptInterface
             fun shareText(t: String) {
                 try {
                     val i = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, t)
@@ -110,7 +122,7 @@ class MainActivity : AppCompatActivity() {
             mediaPlaybackRequiresUserGesture = false
             setGeolocationEnabled(true)
             // Mark the shell so the PWA can detect it and enable shell-only UX later.
-            userAgentString = userAgentString + " MotoMeshShell/1.7"
+            userAgentString = userAgentString + " MotoMeshShell/1.8"
         }
 
         web.webViewClient = object : WebViewClient() {
@@ -181,6 +193,53 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= 26) startForegroundService(i) else startService(i)
     }
 
+    private fun nfcResult(ok: Boolean, msg: String) {
+        runOnUiThread {
+            val safe = msg.replace("\\", "").replace("\"", "'")
+            web.evaluateJavascript("window.mmNfcResult&&mmNfcResult(" + ok + ",\"" + safe + "\")", null)
+            Toast.makeText(this, if (ok) "Tag written" else msg, Toast.LENGTH_SHORT).show()
+        }
+        stopNfc()
+    }
+
+    private fun stopNfc() {
+        try { NfcAdapter.getDefaultAdapter(this)?.disableReaderMode(this) } catch (_: Exception) {}
+        nfcTimeout?.let { Handler(Looper.getMainLooper()).removeCallbacks(it) }; nfcTimeout = null
+    }
+
+    private fun startNfcWrite(u: String) {
+        val ad = NfcAdapter.getDefaultAdapter(this)
+        if (ad == null || !ad.isEnabled) { nfcResult(false, "NFC is off or not available on this phone"); return }
+        nfcUrl = u
+        Toast.makeText(this, "Hold a tag flat against the top-back of the phone", Toast.LENGTH_LONG).show()
+        val to = Runnable { nfcResult(false, "No tag detected in 30s") }
+        nfcTimeout = to; Handler(Looper.getMainLooper()).postDelayed(to, 30000)
+        ad.enableReaderMode(this, { tag -> handleTag(tag) },
+            NfcAdapter.FLAG_READER_NFC_A or NfcAdapter.FLAG_READER_NFC_B or
+            NfcAdapter.FLAG_READER_NFC_F or NfcAdapter.FLAG_READER_NFC_V, null)
+    }
+
+    private fun handleTag(tag: Tag) {
+        try {
+            val u = nfcUrl ?: ""
+            val msg = if (u.isBlank())
+                NdefMessage(arrayOf(NdefRecord(NdefRecord.TNF_EMPTY, ByteArray(0), ByteArray(0), ByteArray(0))))
+            else NdefMessage(arrayOf(NdefRecord.createUri(u)))
+            val ndef = Ndef.get(tag)
+            if (ndef != null) {
+                ndef.connect()
+                if (!ndef.isWritable) { nfcResult(false, "Tag is locked (read-only)"); return }
+                if (ndef.maxSize < msg.toByteArray().size) { nfcResult(false, "Tag is too small for this link"); return }
+                ndef.writeNdefMessage(msg); ndef.close()
+                nfcResult(true, "")
+            } else {
+                val f = NdefFormatable.get(tag)
+                if (f != null) { f.connect(); f.format(msg); f.close(); nfcResult(true, "") }
+                else nfcResult(false, "Unsupported tag type")
+            }
+        } catch (e: Exception) { nfcResult(false, "Write failed: " + (e.message ?: "unknown")) }
+    }
+
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         intent?.data?.takeIf { it.host == "app.moto-mesh.com" }?.let { web.loadUrl(it.toString()) }
@@ -196,6 +255,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        stopNfc()
         if (isFinishing) stopService(Intent(this, MeshService::class.java))
         super.onDestroy()
     }
