@@ -6,6 +6,7 @@
 > **v1.2** · native self-updater (reads `app.moto-mesh.com/shell.json`, downloads via `moto-mesh.com/app`, one-tap install) · REQUEST_INSTALL_PACKAGES + FileProvider · APK 1.2 (code 4).
 > **v1.3** · auto-versioning: `VERSION` file = versionName, GitHub run number = versionCode · permanent-key signing in CI v4 · dual releases (rolling `latest` + tagged `shell-vX-bN` history).
 > **v1.4** · gated distribution: `MMShell.setUpdateToken` stores the member credential, Updater appends `?c=` to the download · pairs with server v3.79.
+> **v1.4 · CI v4.1** · release asset carries full identity: `motomesh-shell_v<VN>-b<run>.apk` · server v3.80 serves it under its own name.
 **What it is:** a ~300-line native Android host. It opens the unchanged PWA
 (https://app.moto-mesh.com) in a System WebView, while the APP holds a
 `microphone|location` **foreground service**. Android law: the process that owns
