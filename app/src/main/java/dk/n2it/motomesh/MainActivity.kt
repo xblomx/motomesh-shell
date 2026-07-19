@@ -156,7 +156,7 @@ class MainActivity : AppCompatActivity() {
             mediaPlaybackRequiresUserGesture = false
             setGeolocationEnabled(true)
             // Mark the shell so the PWA can detect it and enable shell-only UX later.
-            userAgentString = userAgentString + " MotoMeshShell/1.14"
+            userAgentString = userAgentString + " MotoMeshShell/1.15"
         }
 
         web.webViewClient = object : WebViewClient() {
@@ -198,7 +198,8 @@ class MainActivity : AppCompatActivity() {
         requestNeededPermissions()
         val deep = intent?.data?.takeIf { it.host == "app.moto-mesh.com" }?.toString()
         web.loadUrl(deep ?: APP_URL)
-        web.postDelayed({ try { Updater.check(this) } catch (_: Exception) {} }, 8000)
+        val updTick = object : Runnable { override fun run() { try { Updater.check(this@MainActivity) } catch (_: Exception) {}; try { web.postDelayed(this, 30 * 60_000L) } catch (_: Exception) {} } }
+        web.postDelayed(updTick, 8000)
     }
 
     private fun requestNeededPermissions() {
