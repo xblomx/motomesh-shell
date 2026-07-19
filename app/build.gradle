@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.5 · 2026-07-19 · dk.n2it.motomesh
+// Moto Mesh Shell v1.6 · 2026-07-19 · dk.n2it.motomesh
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
