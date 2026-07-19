@@ -26,6 +26,9 @@ import android.os.Looper
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Base64
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.webkit.GeolocationPermissions
 import android.webkit.JavascriptInterface
 import android.webkit.ValueCallback
@@ -42,6 +45,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
+    private var mmFocusReq: AudioFocusRequest? = null
 
     private lateinit var web: WebView
     private var fileCb: ValueCallback<Array<Uri>>? = null
@@ -99,6 +103,29 @@ class MainActivity : AppCompatActivity() {
                 } catch (_: Exception) {}
             }
             @JavascriptInterface
+            fun audioFocus(mode: String) {
+                runOnUiThread {
+                    try {
+                        val am = getSystemService(AUDIO_SERVICE) as AudioManager
+                        if (mode == "duck") {
+                            if (mmFocusReq == null) {
+                                val attrs = AudioAttributes.Builder()
+                                    .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                                    .build()
+                                mmFocusReq = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+                                    .setAudioAttributes(attrs)
+                                    .setWillPauseWhenDucked(false)
+                                    .build()
+                            }
+                            am.requestAudioFocus(mmFocusReq!!)
+                        } else {
+                            mmFocusReq?.let { am.abandonAudioFocusRequest(it) }
+                        }
+                    } catch (_: Exception) {}
+                }
+            }
+            @JavascriptInterface
             fun setUpdateToken(t: String) {
                 try { getSharedPreferences("mm", MODE_PRIVATE).edit().putString("dlc", t.trim()).apply() } catch (_: Exception) {}
             }
@@ -122,7 +149,7 @@ class MainActivity : AppCompatActivity() {
             mediaPlaybackRequiresUserGesture = false
             setGeolocationEnabled(true)
             // Mark the shell so the PWA can detect it and enable shell-only UX later.
-            userAgentString = userAgentString + " MotoMeshShell/1.8"
+            userAgentString = userAgentString + " MotoMeshShell/1.9"
         }
 
         web.webViewClient = object : WebViewClient() {
@@ -256,6 +283,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         stopNfc()
+        try { mmFocusReq?.let { (getSystemService(AUDIO_SERVICE) as AudioManager).abandonAudioFocusRequest(it) } } catch (_: Exception) {}
         if (isFinishing) stopService(Intent(this, MeshService::class.java))
         super.onDestroy()
     }
