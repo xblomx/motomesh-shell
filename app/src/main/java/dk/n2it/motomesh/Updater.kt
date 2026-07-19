@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.11 · 2026-07-19 · MMShell.getUpdate() bridge (chip → native flow) · download-listener speaks on failure · time-based recheck (30 min) instead of once-per-process · non-200 download speaks
+// Moto Mesh Shell v1.12 · audioFocus reports framework result to JS (mmFocusResult) · fresh AudioFocusRequest per cycle · prev v1.11 · 2026-07-19 · MMShell.getUpdate() bridge (chip → native flow) · download-listener speaks on failure · time-based recheck (30 min) instead of once-per-process · non-200 download speaks
 // Self-updater: reads https://app.moto-mesh.com/shell.json {"v":"1.2","url":"https://moto-mesh.com/app"},
 // downloads the APK (following redirects) and hands it to Android's installer · one tap for the rider.
 package dk.n2it.motomesh

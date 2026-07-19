@@ -105,6 +105,7 @@ class MainActivity : AppCompatActivity() {
             @JavascriptInterface
             fun audioFocus(mode: String) {
                 runOnUiThread {
+                    var res = -1
                     try {
                         val am = getSystemService(AUDIO_SERVICE) as AudioManager
                         if (mode == "duck") {
@@ -118,11 +119,12 @@ class MainActivity : AppCompatActivity() {
                                     .setWillPauseWhenDucked(false)
                                     .build()
                             }
-                            am.requestAudioFocus(mmFocusReq!!)
+                            res = am.requestAudioFocus(mmFocusReq!!)
                         } else {
-                            mmFocusReq?.let { am.abandonAudioFocusRequest(it) }
+                            res = mmFocusReq?.let { val r = am.abandonAudioFocusRequest(it); mmFocusReq = null; r } ?: 1
                         }
                     } catch (_: Exception) {}
+                    try { web.evaluateJavascript("try{window.mmFocusResult&&mmFocusResult(\"" + mode + "\"," + res + ")}catch(e){}", null) } catch (_: Exception) {}
                 }
             }
             @JavascriptInterface
@@ -151,7 +153,7 @@ class MainActivity : AppCompatActivity() {
             mediaPlaybackRequiresUserGesture = false
             setGeolocationEnabled(true)
             // Mark the shell so the PWA can detect it and enable shell-only UX later.
-            userAgentString = userAgentString + " MotoMeshShell/1.11"
+            userAgentString = userAgentString + " MotoMeshShell/1.12"
         }
 
         web.webViewClient = object : WebViewClient() {
