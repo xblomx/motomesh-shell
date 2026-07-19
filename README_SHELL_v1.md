@@ -1,4 +1,4 @@
-# Moto Mesh Shell v1.6 · 2026-07-19
+# Moto Mesh Shell v1.7 · 2026-07-19
 
 
 > **v1.0.1** · adds the missing `gradle.properties` (android.useAndroidX) · stamps all resource files · APK versionName 1.0.1.
@@ -9,6 +9,7 @@
 > **v1.4 · CI v4.1** · release asset carries full identity: `motomesh-shell_v<VN>-b<run>.apk` · server v3.80 serves it under its own name.
 > **v1.5** · camera granted end-to-end (VIDEO works in the shell) · MMShell.shareText makes Share buttons native · MODE_IN_COMMUNICATION removed (mic-routing suspect on some devices; voice audio-focus kept).
 > **v1.6** · self-update hardened: canRequestPackageInstalls pre-flight (routes to the exact settings toggle), APK integrity check (size + PK magic), try/catch + toasts around the installer intent.
+> **v1.7** · Android App Links: `app.moto-mesh.com` links (NFC tags, invite/sign-in URLs) open the shell when installed · deep-link on cold start + onNewIntent · requires assetlinks.json (server v3.86) with the release-cert SHA-256.
 **What it is:** a ~300-line native Android host. It opens the unchanged PWA
 (https://app.moto-mesh.com) in a System WebView, while the APP holds a
 `microphone|location` **foreground service**. Android law: the process that owns

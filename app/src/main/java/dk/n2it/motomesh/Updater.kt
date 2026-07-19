@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.6 · 2026-07-19
+// Moto Mesh Shell v1.7 · 2026-07-19
 // Self-updater: reads https://app.moto-mesh.com/shell.json {"v":"1.2","url":"https://moto-mesh.com/app"},
 // downloads the APK (following redirects) and hands it to Android's installer · one tap for the rider.
 package dk.n2it.motomesh
