@@ -27,6 +27,13 @@ android {
         }
     }
     lint { checkReleaseBuilds false; abortOnError false }
+    signingConfigs {
+        release {
+            storeFile file(System.getenv("KS_PATH") ?: "missing.jks")
+            storePassword System.getenv("KS_PW"); keyAlias "motomesh"; keyPassword System.getenv("KS_PW")
+        }
+    }
+    lint { checkReleaseBuilds false; abortOnError false }
     buildTypes {
         release { minifyEnabled false; signingConfig signingConfigs.release }
     }
