@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.8 · 2026-07-19
+// Moto Mesh Shell v1.10 · 2026-07-19 · time-based recheck (30 min) instead of once-per-process · non-200 download speaks
 // Self-updater: reads https://app.moto-mesh.com/shell.json {"v":"1.2","url":"https://moto-mesh.com/app"},
 // downloads the APK (following redirects) and hands it to Android's installer · one tap for the rider.
 package dk.n2it.motomesh
@@ -18,10 +18,11 @@ import kotlin.concurrent.thread
 
 object Updater {
     private const val META = "https://app.moto-mesh.com/shell.json"
-    private var ran = false
+    private var lastCheck = 0L
 
     fun check(act: Activity) {
-        if (ran) return; ran = true
+        val _now = System.currentTimeMillis()
+        if (_now - lastCheck < 30 * 60_000L) return; lastCheck = _now
         thread {
             try {
                 val cur = act.packageManager.getPackageInfo(act.packageName, 0).versionName ?: "0"
@@ -45,6 +46,10 @@ object Updater {
                         c = URL(loc).openConnection() as HttpURLConnection
                         c.connectTimeout = 8000; c.readTimeout = 30000
                     }
+                    if (c.responseCode != 200) {
+                        act.runOnUiThread { Toast.makeText(act, "Update " + latest + " found \u00b7 membership check failed (" + c.responseCode + ") \u00b7 open your invite link or group key once, then try again", Toast.LENGTH_LONG).show() }
+                        return@thread
+                    }
                     c.inputStream.use { i -> out.outputStream().use { o -> i.copyTo(o) } }
                 }
                 val head = ByteArray(2); out.inputStream().use { it.read(head) }
@@ -64,7 +69,7 @@ object Updater {
                                     Toast.makeText(act, "Allow installs for Moto Mesh, then tap INSTALL again", Toast.LENGTH_LONG).show()
                                     act.startActivity(Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
                                         android.net.Uri.parse("package:" + act.packageName)))
-                                    ran = false
+                                    lastCheck = 0L
                                     return@setPositiveButton
                                 }
                                 val uri = FileProvider.getUriForFile(act, "dk.n2it.motomesh.files", out)

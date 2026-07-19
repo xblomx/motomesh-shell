@@ -149,7 +149,7 @@ class MainActivity : AppCompatActivity() {
             mediaPlaybackRequiresUserGesture = false
             setGeolocationEnabled(true)
             // Mark the shell so the PWA can detect it and enable shell-only UX later.
-            userAgentString = userAgentString + " MotoMeshShell/1.9"
+            userAgentString = userAgentString + " MotoMeshShell/1.10"
         }
 
         web.webViewClient = object : WebViewClient() {
