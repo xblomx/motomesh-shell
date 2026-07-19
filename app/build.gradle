@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.0 · 2026-07-19 · dk.n2it.motomesh
+// Moto Mesh Shell v1.0.1 · 2026-07-19 · dk.n2it.motomesh
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
@@ -10,8 +10,8 @@ android {
         applicationId "dk.n2it.motomesh"
         minSdk 26
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.0.1"
     }
     buildTypes {
         release { minifyEnabled false }

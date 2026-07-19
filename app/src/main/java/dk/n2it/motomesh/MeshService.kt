@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.0 · 2026-07-19
+// Moto Mesh Shell v1.0.1 · 2026-07-19
 // The legal keeper of background mic + location. While this notification lives,
 // Android lets the WebView's WebRTC capture and geolocation continue behind any app.
 // It also puts the device in COMMUNICATION mode with voice-call audio focus,

@@ -1,5 +1,7 @@
-# Moto Mesh Shell v1.0 · 2026-07-19
+# Moto Mesh Shell v1.0.1 · 2026-07-19
 
+
+> **v1.0.1** · adds the missing `gradle.properties` (android.useAndroidX) · stamps all resource files · APK versionName 1.0.1.
 **What it is:** a ~300-line native Android host. It opens the unchanged PWA
 (https://app.moto-mesh.com) in a System WebView, while the APP holds a
 `microphone|location` **foreground service**. Android law: the process that owns
