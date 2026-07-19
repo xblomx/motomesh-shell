@@ -1,6 +1,7 @@
-# Moto Mesh Shell v1.1 · push -> APK som artifact
+# Moto Mesh Shell · CI v2 · proven wrapper flow + rolling public release
 name: build-apk
 on: { push: { branches: [ main ] }, workflow_dispatch: {} }
+permissions: { contents: write }
 jobs:
   apk:
     runs-on: ubuntu-latest
@@ -12,5 +13,12 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
       - run: gradle wrapper --gradle-version 8.7
       - run: ./gradlew assembleDebug
+      - run: cp app/build/outputs/apk/debug/app-debug.apk motomesh-shell.apk
       - uses: actions/upload-artifact@v4
-        with: { name: MotoMeshShell-debug-apk, path: app/build/outputs/apk/debug/app-debug.apk }
+        with: { name: MotoMeshShell-debug-apk, path: motomesh-shell.apk }
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: shell-latest
+          name: Moto Mesh Shell (latest)
+          make_latest: true
+          files: motomesh-shell.apk
