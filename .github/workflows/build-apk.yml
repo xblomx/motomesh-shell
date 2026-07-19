@@ -1,4 +1,4 @@
-# Moto Mesh Shell v1.0.1 · push -> APK som artifact
+# Moto Mesh Shell v1.1 · push -> APK som artifact
 name: build-apk
 on: { push: { branches: [ main ] }, workflow_dispatch: {} }
 jobs:

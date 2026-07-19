@@ -1,7 +1,8 @@
-# Moto Mesh Shell v1.0.1 · 2026-07-19
+# Moto Mesh Shell v1.1 · 2026-07-19
 
 
 > **v1.0.1** · adds the missing `gradle.properties` (android.useAndroidX) · stamps all resource files · APK versionName 1.0.1.
+> **v1.1** · WebView file chooser (RESTORE FROM FILE works) · DownloadManager for http links · `MMShell.saveFile` bridge lands blob exports in Downloads/MotoMesh · APK 1.1 (code 3).
 **What it is:** a ~300-line native Android host. It opens the unchanged PWA
 (https://app.moto-mesh.com) in a System WebView, while the APP holds a
 `microphone|location` **foreground service**. Android law: the process that owns

@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.0.1 · 2026-07-19
+// Moto Mesh Shell v1.1 · 2026-07-19
 // Thin native host: System WebView loads the unchanged PWA at https://app.moto-mesh.com.
 // Because THIS app process holds RECORD_AUDIO + a microphone|location foreground service,
 // getUserMedia and geolocation inside the WebView keep running when the app is backgrounded
@@ -12,7 +12,18 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
+import android.app.DownloadManager
+import android.content.ContentValues
+import android.net.Uri
+import android.os.Environment
+import android.provider.MediaStore
+import android.util.Base64
 import android.webkit.GeolocationPermissions
+import android.webkit.JavascriptInterface
+import android.webkit.ValueCallback
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import android.webkit.PermissionRequest
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -25,6 +36,8 @@ import androidx.core.content.ContextCompat
 class MainActivity : AppCompatActivity() {
 
     private lateinit var web: WebView
+    private var fileCb: ValueCallback<Array<Uri>>? = null
+    private lateinit var fileLauncher: ActivityResultLauncher<Intent>
     private val APP_URL = "https://app.moto-mesh.com"
     private val PERM_REQ = 4711
 
@@ -35,6 +48,50 @@ class MainActivity : AppCompatActivity() {
         web = WebView(this)
         setContentView(web)
 
+        fileLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { res ->
+            fileCb?.onReceiveValue(
+                WebChromeClient.FileChooserParams.parseResult(res.resultCode, res.data)
+            )
+            fileCb = null
+        }
+
+        // Blob-export bridge: the PWA hands base64 here; we land it in Downloads/MotoMesh.
+        web.addJavascriptInterface(object {
+            @JavascriptInterface
+            fun saveFile(name: String, b64: String) {
+                try {
+                    val bytes = Base64.decode(b64, Base64.DEFAULT)
+                    val values = ContentValues().apply {
+                        put(MediaStore.Downloads.DISPLAY_NAME, name.ifBlank { "motomesh.bin" })
+                        put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/MotoMesh")
+                        put(MediaStore.Downloads.IS_PENDING, 1)
+                    }
+                    val uri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
+                    uri?.let {
+                        contentResolver.openOutputStream(it)?.use { os -> os.write(bytes) }
+                        values.clear(); values.put(MediaStore.Downloads.IS_PENDING, 0)
+                        contentResolver.update(it, values, null, null)
+                    }
+                    runOnUiThread { Toast.makeText(this@MainActivity, "Saved to Downloads/MotoMesh/" + name, Toast.LENGTH_SHORT).show() }
+                } catch (e: Exception) {
+                    runOnUiThread { Toast.makeText(this@MainActivity, "Save failed", Toast.LENGTH_SHORT).show() }
+                }
+            }
+        }, "MMShell")
+
+        // Plain downloads (http/https) go to the system DownloadManager.
+        web.setDownloadListener { url, _, _, _, _ ->
+            try {
+                if (url.startsWith("http")) {
+                    val dm = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+                    dm.enqueue(DownloadManager.Request(Uri.parse(url))
+                        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED))
+                }
+            } catch (_: Exception) {}
+        }
+
         with(web.settings) {
             javaScriptEnabled = true
             domStorageEnabled = true
@@ -42,7 +99,7 @@ class MainActivity : AppCompatActivity() {
             mediaPlaybackRequiresUserGesture = false
             setGeolocationEnabled(true)
             // Mark the shell so the PWA can detect it and enable shell-only UX later.
-            userAgentString = userAgentString + " MotoMeshShell/1.0.1"
+            userAgentString = userAgentString + " MotoMeshShell/1.1"
         }
 
         web.webViewClient = object : WebViewClient() {
@@ -65,6 +122,15 @@ class MainActivity : AppCompatActivity() {
                     }.toTypedArray()
                     if (wants.isNotEmpty()) request.grant(wants) else request.deny()
                 }
+            }
+            override fun onShowFileChooser(
+                view: WebView, cb: ValueCallback<Array<Uri>>,
+                params: FileChooserParams
+            ): Boolean {
+                fileCb?.onReceiveValue(null)
+                fileCb = cb
+                return try { fileLauncher.launch(params.createIntent()); true }
+                catch (e: Exception) { fileCb = null; false }
             }
             override fun onGeolocationPermissionsShowPrompt(
                 origin: String, callback: GeolocationPermissions.Callback

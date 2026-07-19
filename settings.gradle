@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.0.1 · 2026-07-19
+// Moto Mesh Shell v1.1 · 2026-07-19
 pluginManagement {
     repositories { google(); mavenCentral(); gradlePluginPortal() }
 }
