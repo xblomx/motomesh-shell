@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.3 · 2026-07-19
+// Moto Mesh Shell v1.4 · 2026-07-19
 // Self-updater: reads https://app.moto-mesh.com/shell.json {"v":"1.2","url":"https://moto-mesh.com/app"},
 // downloads the APK (following redirects) and hands it to Android's installer · one tap for the rider.
 package dk.n2it.motomesh
@@ -29,10 +29,12 @@ object Updater {
                 val latest = j.optString("v", "0")
                 val url = j.optString("url", "")
                 if (url.isBlank() || !newer(cur, latest)) return@thread
+                val cred = act.getSharedPreferences("mm", Activity.MODE_PRIVATE).getString("dlc", "") ?: ""
+                val dlUrl = if (cred.isBlank()) url else url + (if (url.contains("?")) "&" else "?") + "c=" + java.net.URLEncoder.encode(cred, "UTF-8")
 
                 val out = File(act.getExternalFilesDir(null), "motomesh-shell-" + latest + ".apk")
                 if (!out.exists() || out.length() < 100_000) {
-                    var c = URL(url).openConnection() as HttpURLConnection
+                    var c = URL(dlUrl).openConnection() as HttpURLConnection
                     c.instanceFollowRedirects = true
                     c.connectTimeout = 8000; c.readTimeout = 30000
                     // follow one cross-scheme hop manually if needed
