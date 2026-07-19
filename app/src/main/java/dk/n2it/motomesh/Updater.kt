@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.12 · audioFocus reports framework result to JS (mmFocusResult) · fresh AudioFocusRequest per cycle · prev v1.11 · 2026-07-19 · MMShell.getUpdate() bridge (chip → native flow) · download-listener speaks on failure · time-based recheck (30 min) instead of once-per-process · non-200 download speaks
+// Moto Mesh Shell v1.13 · talkative updater: user-initiated checks speak every outcome · prev v1.12 · audioFocus reports framework result to JS (mmFocusResult) · fresh AudioFocusRequest per cycle · prev v1.11 · 2026-07-19 · MMShell.getUpdate() bridge (chip → native flow) · download-listener speaks on failure · time-based recheck (30 min) instead of once-per-process · non-200 download speaks
 // Self-updater: reads https://app.moto-mesh.com/shell.json {"v":"1.2","url":"https://moto-mesh.com/app"},
 // downloads the APK (following redirects) and hands it to Android's installer · one tap for the rider.
 package dk.n2it.motomesh
@@ -19,10 +19,11 @@ import kotlin.concurrent.thread
 object Updater {
     private const val META = "https://app.moto-mesh.com/shell.json"
     private var lastCheck = 0L
+    private fun say(act: Activity, m: String) { act.runOnUiThread { Toast.makeText(act, m, Toast.LENGTH_LONG).show() } }
 
-    fun force(act: Activity) { lastCheck = 0L; check(act) }
+    fun force(act: Activity) { lastCheck = 0L; check(act, true) }
 
-    fun check(act: Activity) {
+    fun check(act: Activity, verbose: Boolean = false) {
         val _now = System.currentTimeMillis()
         if (_now - lastCheck < 30 * 60_000L) return; lastCheck = _now
         thread {
@@ -33,7 +34,8 @@ object Updater {
                 val j = JSONObject(meta.inputStream.bufferedReader().readText())
                 val latest = j.optString("v", "0")
                 val url = j.optString("url", "")
-                if (url.isBlank() || !newer(cur, latest)) return@thread
+                if (url.isBlank() || !newer(cur, latest)) { if (verbose) say(act, "You are on the latest version (" + cur + ")"); return@thread }
+                if (verbose) say(act, "Update " + latest + " found \u00b7 downloading\u2026")
                 val cred = act.getSharedPreferences("mm", Activity.MODE_PRIVATE).getString("dlc", "") ?: ""
                 val dlUrl = if (cred.isBlank()) url else url + (if (url.contains("?")) "&" else "?") + "c=" + java.net.URLEncoder.encode(cred, "UTF-8")
 
@@ -85,7 +87,7 @@ object Updater {
                         .setNegativeButton("LATER", null)
                         .show()
                 }
-            } catch (_: Exception) {}
+            } catch (e: Exception) { if (verbose) say(act, "Update check failed \u00b7 " + (e.message ?: "network")) }
         }
     }
 
