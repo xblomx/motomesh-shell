@@ -126,6 +126,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             @JavascriptInterface
+            fun getUpdate() { runOnUiThread { Updater.force(this@MainActivity) } }
+            @JavascriptInterface
             fun setUpdateToken(t: String) {
                 try { getSharedPreferences("mm", MODE_PRIVATE).edit().putString("dlc", t.trim()).apply() } catch (_: Exception) {}
             }
@@ -139,7 +141,7 @@ class MainActivity : AppCompatActivity() {
                     dm.enqueue(DownloadManager.Request(Uri.parse(url))
                         .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED))
                 }
-            } catch (_: Exception) {}
+            } catch (_: Exception) { runOnUiThread { Toast.makeText(this, "Download could not start \u00b7 use the in-app update dialog instead", Toast.LENGTH_LONG).show() } }
         }
 
         with(web.settings) {
@@ -149,7 +151,7 @@ class MainActivity : AppCompatActivity() {
             mediaPlaybackRequiresUserGesture = false
             setGeolocationEnabled(true)
             // Mark the shell so the PWA can detect it and enable shell-only UX later.
-            userAgentString = userAgentString + " MotoMeshShell/1.10"
+            userAgentString = userAgentString + " MotoMeshShell/1.11"
         }
 
         web.webViewClient = object : WebViewClient() {

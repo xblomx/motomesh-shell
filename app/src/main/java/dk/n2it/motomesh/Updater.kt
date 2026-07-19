@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.10 · 2026-07-19 · time-based recheck (30 min) instead of once-per-process · non-200 download speaks
+// Moto Mesh Shell v1.11 · 2026-07-19 · MMShell.getUpdate() bridge (chip → native flow) · download-listener speaks on failure · time-based recheck (30 min) instead of once-per-process · non-200 download speaks
 // Self-updater: reads https://app.moto-mesh.com/shell.json {"v":"1.2","url":"https://moto-mesh.com/app"},
 // downloads the APK (following redirects) and hands it to Android's installer · one tap for the rider.
 package dk.n2it.motomesh
@@ -19,6 +19,8 @@ import kotlin.concurrent.thread
 object Updater {
     private const val META = "https://app.moto-mesh.com/shell.json"
     private var lastCheck = 0L
+
+    fun force(act: Activity) { lastCheck = 0L; check(act) }
 
     fun check(act: Activity) {
         val _now = System.currentTimeMillis()
