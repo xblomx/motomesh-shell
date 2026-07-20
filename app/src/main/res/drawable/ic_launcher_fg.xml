@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Moto Mesh Shell v1.8 · 2026-07-19 -->
+<!-- Moto Mesh Shell v1.9 · mesh-mark · 2026-07-20 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <path android:fillColor="#c8a96e"
-        android:pathData="M54,24a30,30 0 1,0 0.001,0zM54,34a20,20 0 1,1 -0.001,0z"/>
-    <path android:fillColor="#c8a96e"
-        android:pathData="M50,48h8v22h-8zM50,74h8v8h-8z"/>
+    <path android:strokeColor="#c8a96e" android:strokeWidth="2.6" android:strokeLineCap="round" android:pathData="M54,54L54.00,34.00"/>
+    <path android:strokeColor="#c8a96e" android:strokeWidth="2.6" android:strokeLineCap="round" android:pathData="M54,54L73.02,47.82"/>
+    <path android:strokeColor="#c8a96e" android:strokeWidth="2.6" android:strokeLineCap="round" android:pathData="M54,54L65.76,70.18"/>
+    <path android:strokeColor="#c8a96e" android:strokeWidth="2.6" android:strokeLineCap="round" android:pathData="M54,54L42.24,70.18"/>
+    <path android:strokeColor="#c8a96e" android:strokeWidth="2.6" android:strokeLineCap="round" android:pathData="M54,54L34.98,47.82"/>
+    <path android:fillColor="#c8a96e" android:pathData="M49.60,34.00 a4.40,4.40 0 1,0 8.80,0 a4.40,4.40 0 1,0 -8.80,0 z"/>
+    <path android:fillColor="#c8a96e" android:pathData="M68.62,47.82 a4.40,4.40 0 1,0 8.80,0 a4.40,4.40 0 1,0 -8.80,0 z"/>
+    <path android:fillColor="#c8a96e" android:pathData="M61.36,70.18 a4.40,4.40 0 1,0 8.80,0 a4.40,4.40 0 1,0 -8.80,0 z"/>
+    <path android:fillColor="#c8a96e" android:pathData="M37.84,70.18 a4.40,4.40 0 1,0 8.80,0 a4.40,4.40 0 1,0 -8.80,0 z"/>
+    <path android:fillColor="#c8a96e" android:pathData="M30.58,47.82 a4.40,4.40 0 1,0 8.80,0 a4.40,4.40 0 1,0 -8.80,0 z"/>
+    <path android:fillColor="#ece5d8" android:pathData="M47.40,54.00 a6.60,6.60 0 1,0 13.20,0 a6.60,6.60 0 1,0 -13.20,0 z"/>
+    <path android:fillColor="#c8a96e" android:pathData="M50.80,54.00 a3.20,3.20 0 1,0 6.40,0 a3.20,3.20 0 1,0 -6.40,0 z"/>
 </vector>

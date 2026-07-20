@@ -156,7 +156,7 @@ class MainActivity : AppCompatActivity() {
             mediaPlaybackRequiresUserGesture = false
             setGeolocationEnabled(true)
             // Mark the shell so the PWA can detect it and enable shell-only UX later.
-            userAgentString = userAgentString + " MotoMeshShell/1.15"
+            userAgentString = userAgentString + " MotoMeshShell/1.16"
         }
 
         web.webViewClient = object : WebViewClient() {
@@ -193,6 +193,31 @@ class MainActivity : AppCompatActivity() {
             override fun onGeolocationPermissionsShowPrompt(
                 origin: String, callback: GeolocationPermissions.Callback
             ) { callback.invoke(origin, true, false) }
+            // Branded JS dialogs · no "The page at <url> says" · shows "Moto Mesh"
+            override fun onJsAlert(view: WebView?, url: String?, message: String?, result: android.webkit.JsResult): Boolean {
+                android.app.AlertDialog.Builder(this@MainActivity)
+                    .setTitle("Moto Mesh").setMessage(message)
+                    .setPositiveButton("OK") { _, _ -> result.confirm() }
+                    .setOnCancelListener { result.cancel() }.setCancelable(true).show()
+                return true
+            }
+            override fun onJsConfirm(view: WebView?, url: String?, message: String?, result: android.webkit.JsResult): Boolean {
+                android.app.AlertDialog.Builder(this@MainActivity)
+                    .setTitle("Moto Mesh").setMessage(message)
+                    .setPositiveButton("OK") { _, _ -> result.confirm() }
+                    .setNegativeButton("Cancel") { _, _ -> result.cancel() }
+                    .setOnCancelListener { result.cancel() }.show()
+                return true
+            }
+            override fun onJsPrompt(view: WebView?, url: String?, message: String?, defaultValue: String?, result: android.webkit.JsPromptResult): Boolean {
+                val input = android.widget.EditText(this@MainActivity).apply { setText(defaultValue ?: "") }
+                android.app.AlertDialog.Builder(this@MainActivity)
+                    .setTitle("Moto Mesh").setMessage(message).setView(input)
+                    .setPositiveButton("OK") { _, _ -> result.confirm(input.text.toString()) }
+                    .setNegativeButton("Cancel") { _, _ -> result.cancel() }
+                    .setOnCancelListener { result.cancel() }.show()
+                return true
+            }
         }
 
         requestNeededPermissions()
