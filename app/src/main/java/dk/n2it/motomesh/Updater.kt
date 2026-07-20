@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.15 · native periodic re-check every 30 min while the app runs · prev v1.13-1.14 · talkative updater: user-initiated checks speak every outcome · prev v1.12 · audioFocus reports framework result to JS (mmFocusResult) · fresh AudioFocusRequest per cycle · prev v1.11 · 2026-07-19 · MMShell.getUpdate() bridge (chip → native flow) · download-listener speaks on failure · time-based recheck (30 min) instead of once-per-process · non-200 download speaks
+// Moto Mesh Shell v1.18 · re-check on app resume (no full restart needed) · v1.15 native periodic re-check every 30 min while the app runs · prev v1.13-1.14 · talkative updater: user-initiated checks speak every outcome · prev v1.12 · audioFocus reports framework result to JS (mmFocusResult) · fresh AudioFocusRequest per cycle · prev v1.11 · 2026-07-19 · MMShell.getUpdate() bridge (chip → native flow) · download-listener speaks on failure · time-based recheck (30 min) instead of once-per-process · non-200 download speaks
 // Self-updater: reads https://app.moto-mesh.com/shell.json {"v":"1.2","url":"https://moto-mesh.com/app"},
 // downloads the APK (following redirects) and hands it to Android's installer · one tap for the rider.
 package dk.n2it.motomesh
@@ -22,6 +22,11 @@ object Updater {
     private fun say(act: Activity, m: String) { act.runOnUiThread { Toast.makeText(act, m, Toast.LENGTH_LONG).show() } }
 
     fun force(act: Activity) { lastCheck = 0L; check(act, true) }
+    fun onResumeCheck(act: Activity) {
+        // returning to the app surfaces a pending update quickly · own 60s throttle so it never spams
+        if (System.currentTimeMillis() - lastCheck < 60_000L) return
+        lastCheck = 0L; check(act, false)
+    }
 
     fun check(act: Activity, verbose: Boolean = false) {
         val _now = System.currentTimeMillis()

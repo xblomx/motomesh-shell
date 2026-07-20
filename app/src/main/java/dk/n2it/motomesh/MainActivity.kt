@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.17 · 2026-07-20 · MMShell.haptic() vibrator bridge (premium tactile) · branded JS dialogs (onJsAlert/Confirm/Prompt · "Moto Mesh" title, no URL) + mesh-mark launcher icon · prev: Moto Mesh Shell v1.8 · 2026-07-19
+// Moto Mesh Shell v1.18 · 2026-07-20 · re-check for update on app resume · MMShell.haptic() vibrator bridge (premium tactile) · branded JS dialogs (onJsAlert/Confirm/Prompt · "Moto Mesh" title, no URL) + mesh-mark launcher icon · prev: Moto Mesh Shell v1.8 · 2026-07-19
 // Thin native host: System WebView loads the unchanged PWA at https://app.moto-mesh.com.
 // Because THIS app process holds RECORD_AUDIO + a microphone|location foreground service,
 // getUserMedia and geolocation inside the WebView keep running when the app is backgrounded
@@ -168,7 +168,7 @@ class MainActivity : AppCompatActivity() {
             mediaPlaybackRequiresUserGesture = false
             setGeolocationEnabled(true)
             // Mark the shell so the PWA can detect it and enable shell-only UX later.
-            userAgentString = userAgentString + " MotoMeshShell/1.17"
+            userAgentString = userAgentString + " MotoMeshShell/1.18"
         }
 
         web.webViewClient = object : WebViewClient() {
@@ -312,6 +312,10 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) { nfcResult(false, "Write failed: " + (e.message ?: "unknown")) }
     }
 
+    override fun onResume() {
+        super.onResume()
+        try { Updater.onResumeCheck(this) } catch (_: Exception) {}
+    }
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         intent?.data?.takeIf { it.host == "app.moto-mesh.com" }?.let { web.loadUrl(it.toString()) }
