@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.8 · 2026-07-19
+// Moto Mesh Shell v1.17 · 2026-07-20 · MMShell.haptic() vibrator bridge (premium tactile) · branded JS dialogs (onJsAlert/Confirm/Prompt · "Moto Mesh" title, no URL) + mesh-mark launcher icon · prev: Moto Mesh Shell v1.8 · 2026-07-19
 // Thin native host: System WebView loads the unchanged PWA at https://app.moto-mesh.com.
 // Because THIS app process holds RECORD_AUDIO + a microphone|location foreground service,
 // getUserMedia and geolocation inside the WebView keep running when the app is backgrounded
@@ -74,6 +74,18 @@ class MainActivity : AppCompatActivity() {
 
         // Blob-export bridge: the PWA hands base64 here; we land it in Downloads/MotoMesh.
         web.addJavascriptInterface(object {
+            @JavascriptInterface
+            fun haptic(ms: Int) {
+                try {
+                    val v = if (android.os.Build.VERSION.SDK_INT >= 31)
+                        (getSystemService(android.content.Context.VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager).defaultVibrator
+                    else @Suppress("DEPRECATION") (getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator)
+                    val d = (if (ms in 1..2000) ms else 18).toLong()
+                    if (android.os.Build.VERSION.SDK_INT >= 26)
+                        v.vibrate(android.os.VibrationEffect.createOneShot(d, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+                    else @Suppress("DEPRECATION") v.vibrate(d)
+                } catch (_: Exception) {}
+            }
             @JavascriptInterface
             fun saveFile(name: String, b64: String) {
                 try {
@@ -156,7 +168,7 @@ class MainActivity : AppCompatActivity() {
             mediaPlaybackRequiresUserGesture = false
             setGeolocationEnabled(true)
             // Mark the shell so the PWA can detect it and enable shell-only UX later.
-            userAgentString = userAgentString + " MotoMeshShell/1.16"
+            userAgentString = userAgentString + " MotoMeshShell/1.17"
         }
 
         web.webViewClient = object : WebViewClient() {
