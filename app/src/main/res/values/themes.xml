@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Moto Mesh Shell v1.8 -->
+<!-- Moto Mesh Shell v1.20 -->
 <resources>
     <style name="Theme.MotoMesh" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowBackground">#0d0f12</item>
         <item name="android:statusBarColor">#0d0f12</item>
         <item name="android:navigationBarColor">#0d0f12</item>
+        <!-- SDK 35: keep classic bar layout · proper edge-to-edge later when testable -->
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 </resources>

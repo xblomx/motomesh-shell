@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.19 · 2026-07-20 · clear stale "update done" notification on app open · re-check for update on app resume · MMShell.haptic() vibrator bridge (premium tactile) · branded JS dialogs (onJsAlert/Confirm/Prompt · "Moto Mesh" title, no URL) + mesh-mark launcher icon · prev: Moto Mesh Shell v1.8 · 2026-07-19
+// Moto Mesh Shell v1.20 · 2026-07-20 · targetSdk 35 (Play Store) · clear stale "update done" notification on app open · re-check for update on app resume · MMShell.haptic() vibrator bridge (premium tactile) · branded JS dialogs (onJsAlert/Confirm/Prompt · "Moto Mesh" title, no URL) + mesh-mark launcher icon · prev: Moto Mesh Shell v1.8 · 2026-07-19
 // Thin native host: System WebView loads the unchanged PWA at https://app.moto-mesh.com.
 // Because THIS app process holds RECORD_AUDIO + a microphone|location foreground service,
 // getUserMedia and geolocation inside the WebView keep running when the app is backgrounded
@@ -168,7 +168,7 @@ class MainActivity : AppCompatActivity() {
             mediaPlaybackRequiresUserGesture = false
             setGeolocationEnabled(true)
             // Mark the shell so the PWA can detect it and enable shell-only UX later.
-            userAgentString = userAgentString + " MotoMeshShell/1.19"
+            userAgentString = userAgentString + " MotoMeshShell/1.20"
         }
 
         web.webViewClient = object : WebViewClient() {
