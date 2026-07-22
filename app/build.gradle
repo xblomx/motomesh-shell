@@ -1,4 +1,4 @@
-// Moto Mesh Shell v1.8 · 2026-07-19 · dk.n2it.motomesh
+// Moto Mesh Shell v1.23 · 2026-07-22 · dist-flavors: sideload (self-update) / play (no self-update, no REQUEST_INSTALL_PACKAGES · Play policy) · prev v1.8
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
@@ -12,6 +12,14 @@ android {
         targetSdk 35
         versionCode ((System.getenv("VC") ?: "999") as Integer)
         versionName (System.getenv("VN") ?: "1.3-dev")
+    }
+    buildFeatures { buildConfig true }
+    flavorDimensions = ["dist"]
+    productFlavors {
+        // sideload: GitHub/NFC-kanalen · beholder den native self-updater
+        sideload { dimension "dist"; buildConfigField "boolean", "SELF_UPDATE", "true" }
+        // play: Google Play-kanalen · opdateringer kommer fra Play, aldrig fra appen selv
+        play     { dimension "dist"; buildConfigField "boolean", "SELF_UPDATE", "false" }
     }
     signingConfigs {
         release {

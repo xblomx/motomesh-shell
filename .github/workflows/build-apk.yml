@@ -1,4 +1,4 @@
-# Moto Mesh Shell · CI v4.2 · also builds signed AAB for Play · auto-versioned, permanently signed, dual-release (latest + tagged history)
+# Moto Mesh Shell · CI v4.3 · dual-flavor: sideload APK (self-update) + Play AAB (no self-update, no REQUEST_INSTALL_PACKAGES) · auto-versioned, permanently signed, dual-release
 name: build-apk
 on: { push: { branches: [ main ] }, workflow_dispatch: {} }
 permissions: { contents: write }
@@ -18,10 +18,10 @@ jobs:
       - uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v3
       - run: gradle wrapper --gradle-version 8.7
-      - run: ./gradlew assembleRelease
-      - run: ./gradlew bundleRelease
-      - run: cp app/build/outputs/apk/release/app-release.apk "motomesh-shell_v${VN}-b${VC}.apk"
-      - run: cp app/build/outputs/bundle/release/app-release.aab "motomesh-shell_v${VN}-b${VC}.aab"
+      - run: ./gradlew assembleSideloadRelease
+      - run: ./gradlew bundlePlayRelease
+      - run: cp app/build/outputs/apk/sideload/release/app-sideload-release.apk "motomesh-shell_v${VN}-b${VC}.apk"
+      - run: cp app/build/outputs/bundle/playRelease/app-play-release.aab "motomesh-shell-play_v${VN}-b${VC}.aab"
       - uses: actions/upload-artifact@v4
         with: { name: MotoMeshShell-apk, path: motomesh-shell_v*.apk }
       - uses: softprops/action-gh-release@v2
@@ -31,7 +31,7 @@ jobs:
           make_latest: true
           files: |
             motomesh-shell_v*.apk
-            motomesh-shell_v*.aab
+            motomesh-shell-play_v*.aab
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: shell-v${{ env.VN }}-b${{ github.run_number }}
@@ -39,4 +39,4 @@ jobs:
           make_latest: false
           files: |
             motomesh-shell_v*.apk
-            motomesh-shell_v*.aab
+            motomesh-shell-play_v*.aab
